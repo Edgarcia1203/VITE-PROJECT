@@ -1,32 +1,43 @@
 // SignUpForm.jsx
 import React, { useState } from 'react';
 
-const SignUpForm = () => {
+const SignUpForm = ({ setToken }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted');
+    try {
+      // Form validation
+      if (username.length < 8 || password.length < 8) {
+        setError('Username and password must be at least 8 characters long.');
+        return;
+      }
+
+      const response = await fetch('https://fsa-jwt-practice.herokuapp.com/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setToken(result.token);
+      } else {
+        setError(result.message);
+      }
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
   return (
     <>
-      <h2>Sign Up</h2>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Username:
-          <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
-        </label>
-        <br />
-        <label>
-          Password:
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        </label>
-        <br />
-        <button type="submit">Submit</button>
-      </form>
+      {/* ... (previous code) */}
     </>
   );
 };
